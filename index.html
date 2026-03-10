@@ -184,11 +184,22 @@ html,body{width:100%;height:100dvh;overflow:hidden;background:var(--bg);color:va
 .oqt{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:1.6}
 .oqm{font-size:11px;color:var(--muted);margin-top:4px}
 .ovf{padding:13px 20px calc(26px + var(--safe));display:flex;flex-direction:column;gap:9px;flex-shrink:0}
+/* Bouton fill progressif */
+.btn-fill{position:relative;overflow:hidden;color:var(--muted) !important;border-color:var(--line) !important;cursor:not-allowed !important;transition:color .2s}
+.btn-fill::before{content:'';position:absolute;top:0;left:0;height:100%;width:0%;background:var(--red);opacity:.18;transition:none;border-radius:14px}
+.btn-fill.ready{cursor:pointer !important;color:var(--ink) !important;border-color:var(--red) !important}
+.btn-fill.ready::before{background:transparent}
+/* Boutons s7b désactivés au départ */
+.btn-locked{opacity:.35;pointer-events:none;cursor:not-allowed}
+/* Fill animation bouton s7b */
+.btn-unlock-wrap{position:relative;overflow:hidden;border-radius:14px}
+.btn-unlock-fill{position:absolute;top:0;left:0;height:100%;width:0%;background:rgba(66,196,126,.15);transition:none;pointer-events:none}
+.btn-unlock-fill.slip{background:rgba(232,86,58,.12)}
 /* Timer ring */
 @keyframes timer-pulse{0%,100%{opacity:1}50%{opacity:.6}}
 .timer-done #timer-ring{stroke:var(--green)}
 .vplay-outer{width:100%;position:relative}
-.vplay-wrap{width:100%;position:relative;border-radius:18px;overflow:hidden;background:#000;border:1px solid var(--line);height:46vh;max-height:320px}
+.vplay-wrap{width:100%;position:relative;border-radius:18px;overflow:hidden;background:#000;border:1px solid var(--line);height:52vh;max-height:360px}
 .vplay-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
 .vplay-badge{position:absolute;top:10px;left:10px;background:rgba(232,86,58,.85);backdrop-filter:blur(6px);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:white;letter-spacing:.06em;text-transform:uppercase}
 .vplay-comp{position:absolute;bottom:-10px;right:-10px;filter:drop-shadow(0 -6px 16px rgba(0,0,0,.8));z-index:2}
@@ -384,10 +395,12 @@ textarea::placeholder{color:var(--muted)}
     <div id="vid-playback-wrap" style="width:100%;flex-shrink:0"></div>
     <div class="oq" style="margin:0;flex-shrink:0"><div class="oqt" id="oqt">« J'arrête Uber Eats. »</div><div class="oqm" id="oqm">— Toi, il y a 8 jours</div></div>
   </div>
-  <!-- CTA -->
+  <!-- CTA avec fill progressif -->
   <div style="padding:10px 18px calc(20px + var(--safe));flex-shrink:0">
-    <button class="btn btn-r" onclick="M.go('s7b')" style="display:flex;align-items:center;justify-content:center;gap:8px">
-      <span>Prendre 30s pour réfléchir</span> <span style="font-size:18px">→</span>
+    <button class="btn btn-o btn-fill" id="btn-next" onclick="M.tryNext()" style="display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden">
+      <div class="btn-fill-bar" id="btn-fill-bar" style="position:absolute;top:0;left:0;height:100%;width:0%;background:rgba(232,86,58,.22);pointer-events:none;border-radius:13px;transition:none"></div>
+      <span style="position:relative;z-index:1" id="btn-next-lbl">Regarde d'abord…</span>
+      <span style="position:relative;z-index:1;font-size:18px" id="btn-next-arr" style="opacity:.4">→</span>
     </button>
   </div>
 </div>
@@ -418,10 +431,16 @@ textarea::placeholder{color:var(--muted)}
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--ink);line-height:1.5;text-align:center" id="refl-msg">Vraiment envie,<br>ou juste habitude ?</div>
     <div style="font-size:13px;color:var(--muted);line-height:1.6;text-align:center" id="refl-sub">Ton compagnon attend avec toi.</div>
   </div>
-  <!-- Boutons -->
+  <!-- Boutons — locked jusqu'à fin du timer -->
   <div style="padding:10px 18px calc(22px + var(--safe));flex-shrink:0;display:flex;flex-direction:column;gap:10px">
-    <button class="btn btn-g" id="btn-resist" onclick="M.resist()">✓ Je résiste — fermer l'app</button>
-    <button class="btn btn-o" id="btn-slip" onclick="M.go('s8')">J'y vais quand même…</button>
+    <div class="btn-unlock-wrap">
+      <div class="btn-unlock-fill" id="fill-resist"></div>
+      <button class="btn btn-g btn-locked" id="btn-resist" onclick="M.resist()">✓ Je résiste — fermer l'app</button>
+    </div>
+    <div class="btn-unlock-wrap">
+      <div class="btn-unlock-fill slip" id="fill-slip"></div>
+      <button class="btn btn-o btn-locked" id="btn-slip" onclick="M.go('s8')">J'y vais quand même…</button>
+    </div>
   </div>
 </div>
 
@@ -740,21 +759,42 @@ function simT(){
   setTimeout(function(){go('s7');},1000);
 }
 
+var btnTimerInt=null, btnReady=false;
+
 function renderVidPlayback(domKey){
   var wrap=$('vid-playback-wrap'); if(!wrap) return;
   var blobURL = storedBlobs[domKey] || storedBlobs[Object.keys(storedBlobs)[0]] || null;
   var domLabel = (DC[domKey]||DC['delivery']).l;
   var compSVG = mkSVG(ST.comp, 86);
+  btnReady = false;
+  clearInterval(btnTimerInt);
+  // Reset bouton
+  var bar=$('btn-fill-bar'), lbl=$('btn-next-lbl');
+  if(bar){bar.style.width='0%';bar.style.transition='none';}
+  if(lbl)lbl.textContent="Regarde d'abord…";
+  var btn=$('btn-next');
+  if(btn)btn.classList.remove('ready');
+
   if(blobURL){
     wrap.innerHTML = '<div class="vplay-outer">'
       + '<div class="vplay-wrap">'
-      + '<video src="' + blobURL + '" autoplay loop playsinline></video>'
+      + '<video id="engagement-vid" src="' + blobURL + '" playsinline></video>'
       + '<div class="vplay-badge">Ton engagement · ' + domLabel + '</div>'
       + '</div>'
       + '<div class="vplay-comp">' + compSVG + '</div>'
       + '</div>';
-    var v = wrap.querySelector('video');
-    if(v){ v.muted=false; v.play().catch(function(){ v.muted=true; v.play(); }); }
+    var v = document.getElementById('engagement-vid');
+    if(v){
+      v.muted=false;
+      v.play().catch(function(){ v.muted=true; v.play(); });
+      // Attendre que la durée soit connue
+      v.addEventListener('loadedmetadata', function(){
+        var dur = Math.max(Math.ceil(v.duration) || 3, 1);
+        startBtnTimer(dur);
+      });
+      // Fallback si metadata jamais déclenché
+      setTimeout(function(){ if(!btnReady) startBtnTimer(3); }, 800);
+    }
   } else {
     wrap.innerHTML = '<div class="vplay-outer">'
       + '<div class="vplay-wrap" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:20px">'
@@ -763,7 +803,36 @@ function renderVidPlayback(domKey){
       + '</div>'
       + '<div class="vplay-comp">' + compSVG + '</div>'
       + '</div>';
+    // Pas de vidéo = 3s
+    startBtnTimer(3);
   }
+}
+
+function startBtnTimer(totalSec){
+  if(btnReady) return;
+  clearInterval(btnTimerInt);
+  var elapsed=0;
+  var bar=$('btn-fill-bar'), lbl=$('btn-next-lbl'), btn=$('btn-next');
+  var step=50; // ms
+  btnTimerInt=setInterval(function(){
+    elapsed+=step;
+    var pct=Math.min((elapsed/(totalSec*1000))*100, 100);
+    if(bar) bar.style.width=pct+'%';
+    var remaining=Math.max(Math.ceil((totalSec*1000-elapsed)/1000),0);
+    if(lbl && remaining>0) lbl.textContent='Prendre 30s pour réfléchir (' + remaining + 's)';
+    if(pct>=100){
+      clearInterval(btnTimerInt);
+      btnReady=true;
+      if(bar){bar.style.width='100%';bar.style.background='rgba(232,86,58,.35)';}
+      if(lbl) lbl.textContent='Prendre 30s pour réfléchir';
+      if(btn) btn.classList.add('ready');
+    }
+  }, step);
+}
+
+function tryNext(){
+  if(!btnReady){ return; }
+  M.go('s7b');
 }
 var timerInt=null;
 function startTimer(){
@@ -773,23 +842,46 @@ function startTimer(){
   var cnt=document.getElementById('timer-count');
   var msg=document.getElementById('refl-msg');
   var sub=document.getElementById('refl-sub');
+  var fr=$('fill-resist'), fs=$('fill-slip');
+  var br=$('btn-resist'), bs=$('btn-slip');
   // Réinitialiser
   if(ring){ring.style.strokeDashoffset='427';ring.style.stroke='var(--fox)';}
   if(cnt){cnt.textContent='30';cnt.style.background='var(--fox)';}
+  // Boutons locked + fill reset
+  if(br)br.classList.add('btn-locked');
+  if(bs)bs.classList.add('btn-locked');
+  if(fr){fr.style.width='0%';fr.style.transition='none';}
+  if(fs){fs.style.width='0%';fs.style.transition='none';}
+  // Forcer reflow pour reset transition
+  if(fr) fr.offsetWidth;
+  if(fs) fs.offsetWidth;
+
+  var step=50;
+  var elapsed=0;
   timerInt=setInterval(function(){
-    sec--;
-    var pct=(sec/30);
-    var offset=427*(1-pct);
+    elapsed+=step;
+    sec=Math.max(30-Math.floor(elapsed/1000),0);
+    var pct=Math.min((elapsed/30000)*100,100);
+    var offset=427*(1-pct/100);
     if(ring) ring.style.strokeDashoffset=offset;
     if(cnt)  cnt.textContent=sec;
+    // Couleur ring: fox → green dans les 10 dernières secondes
     if(sec<=10&&ring) ring.style.stroke='var(--green)';
     if(sec<=10&&cnt)  cnt.style.background='var(--green)';
-    if(sec<=0){
+    // Fill des boutons en parallèle
+    if(fr) fr.style.width=pct+'%';
+    if(fs) fs.style.width=pct+'%';
+    if(pct>=100){
       clearInterval(timerInt);
+      // Unlock boutons
+      if(br){br.classList.remove('btn-locked');br.style.opacity='';}
+      if(bs){bs.classList.remove('btn-locked');bs.style.opacity='';}
+      if(fr) fr.style.width='0%';
+      if(fs) fs.style.width='0%';
       if(msg) msg.textContent="Tu as pris le temps de te poser la question.";
-      if(sub) sub.textContent="C'est deja quelque chose.";
+      if(sub) sub.textContent="C'est maintenant ton choix.";
     }
-  },1000);
+  },step);
 }
 function stopTimer(){ clearInterval(timerInt); }
 
@@ -939,7 +1031,7 @@ function init(){
 
 // Retourner l'API publique
 return {
-  go:go, back:back, nav:nav, demo:demo,
+  go:go, back:back, nav:nav, demo:demo, tryNext:tryNext,
   saveDomains:saveDomains, switchD:switchD, pick:pick,
   simT:simT, resist:resist, saveSlip:saveSlip, pet:pet,
   toggleRec:toggleRec, validateRec:validateRec, cancelRec:cancelRec,
