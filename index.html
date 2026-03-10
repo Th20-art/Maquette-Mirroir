@@ -184,13 +184,14 @@ html,body{width:100%;height:100dvh;overflow:hidden;background:var(--bg);color:va
 .oqt{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:1.6}
 .oqm{font-size:11px;color:var(--muted);margin-top:4px}
 .ovf{padding:13px 20px calc(26px + var(--safe));display:flex;flex-direction:column;gap:9px;flex-shrink:0}
-.vplay-wrap{width:100%;position:relative;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line);max-height:200px}
+.vplay-outer{width:100%;position:relative}
+.vplay-wrap{width:100%;position:relative;border-radius:18px;overflow:hidden;background:#000;border:1px solid var(--line);aspect-ratio:9/14}
 .vplay-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
-.vplay-badge{position:absolute;top:8px;left:8px;background:rgba(232,86,58,.85);backdrop-filter:blur(6px);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:white;letter-spacing:.06em;text-transform:uppercase}
+.vplay-badge{position:absolute;top:10px;left:10px;background:rgba(232,86,58,.85);backdrop-filter:blur(6px);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:white;letter-spacing:.06em;text-transform:uppercase}
+.vplay-comp{position:absolute;bottom:-10px;right:-10px;filter:drop-shadow(0 -6px 16px rgba(0,0,0,.8));z-index:2}
 .vplay-no{width:100%;display:flex;align-items:center;gap:10px;padding:14px;background:var(--c1);border:1px solid var(--line);border-radius:13px}
 .vplay-ico{font-size:28px;animation:gp 2s ease-in-out infinite}
 .vplay-lbl{font-size:12px;color:var(--muted);line-height:1.5}
-
 /* VIC */
 .vb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:16px;text-align:center;position:relative}
 .vg{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(66,196,126,.1) 0%,transparent 60%);pointer-events:none}
@@ -374,8 +375,7 @@ textarea::placeholder{color:var(--muted)}
     <div><div class="oan" id="oan">Uber Eats</div><div class="ob2">● Intercepté par Miroir</div></div>
   </div>
   <div class="ovb">
-    <div id="vid-playback-wrap"></div>
-    <div id="ovsvg"></div>
+    <div id="vid-playback-wrap" style="width:100%"></div>
     <div class="om">Léa, tu as quelque chose à te dire.</div>
     <div class="oq"><div class="oqt" id="oqt">« J'arrête Uber Eats. »</div><div class="oqm" id="oqm">— Toi, il y a 8 jours</div></div>
   </div>
@@ -695,7 +695,6 @@ function refreshVic(n){
 function simT(){
   var k=ST.domains[ST.curD]||ST.domains[0]||'delivery',d=DC[k];
   tx('oai',d.ai);tx('oan',d.a);tx('oqt',d.q);tx('oqm','— Toi, il y a '+ST.day+' jours');
-  ih('ovsvg',mkSVG(ST.comp,108));
   renderVidPlayback(k);
   toast(d.l+' intercepté',d.e);
   setTimeout(function(){go('s7');},1000);
@@ -704,17 +703,25 @@ function simT(){
 function renderVidPlayback(domKey){
   var wrap=$('vid-playback-wrap'); if(!wrap) return;
   var blobURL = storedBlobs[domKey] || storedBlobs[Object.keys(storedBlobs)[0]] || null;
+  var domLabel = (DC[domKey]||DC['delivery']).l;
+  var compSVG = mkSVG(ST.comp, 86);
   if(blobURL){
-    wrap.innerHTML = '<div class="vplay-wrap">'
-      + '<video src="' + blobURL + '" autoplay loop muted playsinline></video>'
-      + '<div class="vplay-badge">Ton engagement</div>'
+    wrap.innerHTML = '<div class="vplay-outer">'
+      + '<div class="vplay-wrap">'
+      + '<video src="' + blobURL + '" autoplay loop playsinline></video>'
+      + '<div class="vplay-badge">Ton engagement · ' + domLabel + '</div>'
+      + '</div>'
+      + '<div class="vplay-comp">' + compSVG + '</div>'
       + '</div>';
     var v = wrap.querySelector('video');
     if(v){ v.muted=false; v.play().catch(function(){ v.muted=true; v.play(); }); }
   } else {
-    wrap.innerHTML = '<div class="vplay-no">'
-      + '<div class="vplay-ico">&#127897;</div>'
-      + '<div class="vplay-lbl">Enregistre ta video pour la voir ici</div>'
+    wrap.innerHTML = '<div class="vplay-outer">'
+      + '<div class="vplay-wrap" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:20px">'
+      + '<div style="font-size:40px;animation:gp 2s ease-in-out infinite">&#127897;</div>'
+      + '<div style="font-size:12px;color:var(--muted);line-height:1.5">Enregistre ta video<br>pour la voir ici</div>'
+      + '</div>'
+      + '<div class="vplay-comp">' + compSVG + '</div>'
       + '</div>';
   }
 }
@@ -815,7 +822,7 @@ function go(id){
   $('bnav').classList.toggle('V',!!NAV[id]);
   if(id==='s5')initCam();
   if(id==='s6')renderDash();
-  if(id==='s7'){ih('ovsvg',mkSVG(ST.comp,108));renderVidPlayback(ST.domains[ST.curD]||ST.domains[0]||'delivery');}
+  if(id==='s7'){renderVidPlayback(ST.domains[ST.curD]||ST.domains[0]||'delivery');}
   if(id==='s9'){ih('vsvg',mkSVG(ST.comp,100,true));refreshVic(0);}
   if(id==='s8')ih('ssvg',mkSVG(ST.comp,78,false,true));
 }
