@@ -184,8 +184,11 @@ html,body{width:100%;height:100dvh;overflow:hidden;background:var(--bg);color:va
 .oqt{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;line-height:1.6}
 .oqm{font-size:11px;color:var(--muted);margin-top:4px}
 .ovf{padding:13px 20px calc(26px + var(--safe));display:flex;flex-direction:column;gap:9px;flex-shrink:0}
+/* Timer ring */
+@keyframes timer-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.timer-done #timer-ring{stroke:var(--green)}
 .vplay-outer{width:100%;position:relative}
-.vplay-wrap{width:100%;position:relative;border-radius:18px;overflow:hidden;background:#000;border:1px solid var(--line);aspect-ratio:9/14}
+.vplay-wrap{width:100%;position:relative;border-radius:18px;overflow:hidden;background:#000;border:1px solid var(--line);height:46vh;max-height:320px}
 .vplay-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
 .vplay-badge{position:absolute;top:10px;left:10px;background:rgba(232,86,58,.85);backdrop-filter:blur(6px);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:white;letter-spacing:.06em;text-transform:uppercase}
 .vplay-comp{position:absolute;bottom:-10px;right:-10px;filter:drop-shadow(0 -6px 16px rgba(0,0,0,.8));z-index:2}
@@ -369,19 +372,56 @@ textarea::placeholder{color:var(--muted)}
 
 <!-- OVERLAY -->
 <div class="scr" id="s7" style="z-index:9">
-  <div class="sb" style="flex-shrink:0"><span>22:47</span><span style="letter-spacing:2px">···</span></div>
+  <div class="sb" style="flex-shrink:0"><span id="c7">22:47</span><span style="letter-spacing:2px">···</span></div>
+  <!-- Header app interceptée -->
   <div class="ovh">
     <div class="oai" id="oai">🛵</div>
     <div><div class="oan" id="oan">Uber Eats</div><div class="ob2">● Intercepté par Miroir</div></div>
+    <div style="margin-left:auto;font-size:11px;color:var(--muted)">1 / 2</div>
   </div>
-  <div class="ovb">
-    <div id="vid-playback-wrap" style="width:100%"></div>
-    <div class="om">Léa, tu as quelque chose à te dire.</div>
-    <div class="oq"><div class="oqt" id="oqt">« J'arrête Uber Eats. »</div><div class="oqm" id="oqm">— Toi, il y a 8 jours</div></div>
+  <!-- Vidéo + citation -->
+  <div style="flex:1;padding:8px 18px 0;display:flex;flex-direction:column;gap:10px;overflow:hidden;min-height:0">
+    <div id="vid-playback-wrap" style="width:100%;flex-shrink:0"></div>
+    <div class="oq" style="margin:0;flex-shrink:0"><div class="oqt" id="oqt">« J'arrête Uber Eats. »</div><div class="oqm" id="oqm">— Toi, il y a 8 jours</div></div>
   </div>
-  <div class="ovf">
-    <button class="btn btn-g" onclick="M.resist()">✓ Je résiste — fermer l'app</button>
-    <button class="btn btn-o" onclick="M.go('s8')">J'y vais quand même…</button>
+  <!-- CTA -->
+  <div style="padding:10px 18px calc(20px + var(--safe));flex-shrink:0">
+    <button class="btn btn-r" onclick="M.go('s7b')" style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <span>Prendre 30s pour réfléchir</span> <span style="font-size:18px">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- OVERLAY étape 2 — Réflexion 30s -->
+<div class="scr" id="s7b" style="z-index:9;background:rgba(4,3,10,.97);backdrop-filter:blur(18px)">
+  <div class="sb" style="flex-shrink:0"><span>22:47</span><span style="letter-spacing:2px">···</span></div>
+  <div class="ovh">
+    <div class="oai" id="oai-b">🛵</div>
+    <div><div class="oan" id="oan-b">Uber Eats</div><div class="ob2">● Intercepté par Miroir</div></div>
+    <div style="margin-left:auto;font-size:11px;color:var(--muted)">2 / 2</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 24px;gap:14px;text-align:center">
+    <!-- Animal + timer cercle -->
+    <!-- Timer + animal -->
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:150px;height:150px;flex-shrink:0">
+      <svg width="150" height="150" viewBox="0 0 150 150" style="position:absolute;inset:0">
+        <circle cx="75" cy="75" r="68" fill="none" stroke="var(--line)" stroke-width="3"/>
+        <circle cx="75" cy="75" r="68" fill="none" stroke="var(--fox)" stroke-width="3"
+          stroke-dasharray="427" stroke-dashoffset="427"
+          stroke-linecap="round" transform="rotate(-90 75 75)"
+          id="timer-ring" style="transition:stroke-dashoffset 1s linear"/>
+      </svg>
+      <div id="refl-svg" style="position:relative;z-index:1"></div>
+      <div id="timer-count" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:var(--fox);color:white;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;min-width:28px;text-align:center;line-height:1.6">30</div>
+    </div>
+    <!-- Message -->
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--ink);line-height:1.5;text-align:center" id="refl-msg">Vraiment envie,<br>ou juste habitude ?</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;text-align:center" id="refl-sub">Ton compagnon attend avec toi.</div>
+  </div>
+  <!-- Boutons -->
+  <div style="padding:10px 18px calc(22px + var(--safe));flex-shrink:0;display:flex;flex-direction:column;gap:10px">
+    <button class="btn btn-g" id="btn-resist" onclick="M.resist()">✓ Je résiste — fermer l'app</button>
+    <button class="btn btn-o" id="btn-slip" onclick="M.go('s8')">J'y vais quand même…</button>
   </div>
 </div>
 
@@ -432,14 +472,14 @@ var M = (function(){
 
 // ─── CONFIG ───────────────────────────────────────────
 var DC = {
-  fashion:  {l:'Fast Fashion',    e:'👗',c:'#E8563A',a:'Shein',     ai:'👗',q:'« Je m\'engage à ne plus commander sur Shein. Je choisis de m\'habiller autrement. »',   sim:'Tu ouvres Shein à 22h47…'},
-  delivery: {l:'Livraison',       e:'🛵',c:'#D4A030',a:'Uber Eats', ai:'🛵',q:'« J\'arrête Uber Eats. J\'ai une cuisine, je sais cuisiner. »',                           sim:'Tu ouvres Uber Eats à 22h47…'},
-  shopping: {l:'Achats impulsifs',e:'📦',c:'#4A8FE8',a:'Amazon',    ai:'📦',q:'« Avant d\'acheter, j\'attends 48h. Si j\'y pense encore, alors seulement. »',            sim:'Tu ouvres Amazon à 22h47…'},
-  food:     {l:'Alimentation',    e:'🍔',c:'#42C47E',a:'McDo',      ai:'🍔',q:'« Un repas cuisiné par jour minimum. »',                                                  sim:'Tu ouvres l\'app McDo…'},
-  social:   {l:'Réseaux sociaux', e:'📱',c:'#C050A8',a:'Instagram', ai:'📱',q:'« 30 min max. Pas le matin, pas le soir. »',                                              sim:'Tu ouvres Instagram…'},
-  gaming:   {l:'Jeux vidéo',      e:'🎮',c:'#8050C8',a:'TikTok',   ai:'🎮',q:'« Plus de jeux après 23h. Le sommeil d\'abord. »',                                         sim:'Tu ouvres ton jeu…'},
-  alcohol:  {l:'Alcool',          e:'🍷',c:'#E85070',a:'Bar',       ai:'🍷',q:'« L\'alcool uniquement en groupe. Jamais seul(e). »',                                      sim:'Tu ouvres une app bar…'},
-  coffee:   {l:'Café',            e:'☕',c:'#B07840',a:'Starbucks', ai:'☕',q:'« Max 2 cafés par jour, aucun après 14h. »',                                               sim:'Tu ouvres l\'app café…'}
+  fashion:  {l:"Fast Fashion",    e:"👗",c:"#E8563A",a:"Shein",     ai:"👗",q:"« Je m'engage à ne plus commander sur Shein. Je choisis de m'habiller autrement. »",   sim:"Tu ouvres Shein à 22h47…"},
+  delivery: {l:"Livraison",       e:"🛵",c:"#D4A030",a:"Uber Eats", ai:"🛵",q:"« J'arrête Uber Eats. J'ai une cuisine, je sais cuisiner. »",                           sim:"Tu ouvres Uber Eats à 22h47…"},
+  shopping: {l:"Achats impulsifs",e:"📦",c:"#4A8FE8",a:"Amazon",    ai:"📦",q:"« Avant d'acheter, j'attends 48h. Si j'y pense encore, alors seulement. »",             sim:"Tu ouvres Amazon à 22h47…"},
+  food:     {l:"Alimentation",    e:"🍔",c:"#42C47E",a:"McDo",      ai:"🍔",q:"« Un repas cuisiné par jour minimum. »",                                                 sim:"Tu ouvres l'app McDo…"},
+  social:   {l:"Réseaux sociaux", e:"📱",c:"#C050A8",a:"Instagram", ai:"📱",q:"« 30 min max. Pas le matin, pas le soir. »",                                             sim:"Tu ouvres Instagram…"},
+  gaming:   {l:"Jeux vidéo",      e:"🎮",c:"#8050C8",a:"TikTok",   ai:"🎮",q:"« Plus de jeux après 23h. Le sommeil d'abord. »",                                        sim:"Tu ouvres ton jeu…"},
+  alcohol:  {l:"Alcool",          e:"🍷",c:"#E85070",a:"Bar",       ai:"🍷",q:"« L'alcool uniquement en groupe. Jamais seul(e). »",                                     sim:"Tu ouvres une app bar…"},
+  coffee:   {l:"Café",            e:"☕",c:"#B07840",a:"Starbucks", ai:"☕",q:"« Max 2 cafés par jour, aucun après 14h. »",                                              sim:"Tu ouvres l'app café…"}
 };
 var CC = {
   renard:{c:'#E87830',i:'🦊',s:['Louveteau','Renardeau','Renard','Renard Ancien','Renard des Étoiles']},
@@ -454,7 +494,7 @@ var ST = {
   comp:'renard', domains:['fashion','delivery','shopping'],
   curD:0, xp:68, stage:1, day:8,
   jou:[
-    {d:'AUJOURD\'HUI · 14:20',t:'r',x:'Shein ouvert 40s. J\'ai fermé — juste l\'habitude.'},
+    {d:"AUJOURD'HUI · 14:20",t:"r",x:"Shein ouvert 40s. Ferme - juste l'habitude."},
     {d:'HIER · 22:47',t:'s',x:'Commandé Uber Eats. Fatigue post-partiel.'}
   ]
 };
@@ -725,8 +765,36 @@ function renderVidPlayback(domKey){
       + '</div>';
   }
 }
+var timerInt=null;
+function startTimer(){
+  clearInterval(timerInt);
+  var sec=30;
+  var ring=document.getElementById('timer-ring');
+  var cnt=document.getElementById('timer-count');
+  var msg=document.getElementById('refl-msg');
+  var sub=document.getElementById('refl-sub');
+  // Réinitialiser
+  if(ring){ring.style.strokeDashoffset='427';ring.style.stroke='var(--fox)';}
+  if(cnt){cnt.textContent='30';cnt.style.background='var(--fox)';}
+  timerInt=setInterval(function(){
+    sec--;
+    var pct=(sec/30);
+    var offset=427*(1-pct);
+    if(ring) ring.style.strokeDashoffset=offset;
+    if(cnt)  cnt.textContent=sec;
+    if(sec<=10&&ring) ring.style.stroke='var(--green)';
+    if(sec<=10&&cnt)  cnt.style.background='var(--green)';
+    if(sec<=0){
+      clearInterval(timerInt);
+      if(msg) msg.textContent="Tu as pris le temps de te poser la question.";
+      if(sub) sub.textContent="C'est deja quelque chose.";
+    }
+  },1000);
+}
+function stopTimer(){ clearInterval(timerInt); }
+
 function resist(){
-  ST.jou.unshift({d:'MAINTENANT · '+nm(),t:'r',x:'Tu as résisté. Ton compagnon a gagné de l\'XP.'});
+  ST.jou.unshift({d:'MAINTENANT · '+nm(),t:'r',x:"Tu as résisté. Ton compagnon a gagné de l'XP."});
   addXP(XPR);
   go('s9');
 }
@@ -803,7 +871,7 @@ function toggleRec(){
 function validateRec(){
   // Capturer le blob vidéo avant d'arrêter la caméra
   stopCam(); // mediaRec.onstop s'occupera du blob
-  ST.jou.unshift({d:'AUJOURD\'HUI · '+nm(),t:'r',x:'Engagement vidéo enregistré.'});
+  ST.jou.unshift({d:"AUJOURD'HUI · "+nm(),t:'r',x:'Engagement video enregistre.'});
   addXP(XPREC);go('s6');
   setTimeout(function(){toast('Enregistré 🎙 +10xp','🪞');},300);
 }
@@ -814,6 +882,8 @@ var NAV={s6:1,s9:1};
 var cur='s0',hist=[];
 function go(id){
   if(!id||id===cur)return;
+  // Arrêter timer si on quitte s7b
+  if(cur==='s7b'&&id!=='s7b') stopTimer();
   var c=$(cur),n=$(id);if(!c||!n)return;
   c.classList.remove('A');c.classList.add('L');
   n.style.transform='translateX(20px)';n.classList.add('A');
@@ -825,6 +895,14 @@ function go(id){
   if(id==='s7'){renderVidPlayback(ST.domains[ST.curD]||ST.domains[0]||'delivery');}
   if(id==='s9'){ih('vsvg',mkSVG(ST.comp,100,true));refreshVic(0);}
   if(id==='s8')ih('ssvg',mkSVG(ST.comp,78,false,true));
+  if(id==='s7b'){
+    // Sync app header
+    var k7=ST.domains[ST.curD]||ST.domains[0]||'delivery', d7=DC[k7];
+    var ob=document.getElementById('oai-b'); if(ob)ob.textContent=d7.ai;
+    var onb=document.getElementById('oan-b'); if(onb)onb.textContent=d7.a;
+    ih('refl-svg',mkSVG(ST.comp,90));
+    startTimer();
+  }
 }
 function back(){
   if(!hist.length)return;
