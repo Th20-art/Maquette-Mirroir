@@ -218,6 +218,61 @@ html,body{width:100%;height:100dvh;overflow:hidden;background:var(--bg);color:va
 .vxf{height:100%;border-radius:3px;transition:width 1.4s cubic-bezier(.34,1.56,.64,1)}
 .vxs{font-size:10px;color:var(--muted);margin-top:3px}
 
+/* SHEIN FAKE SCREEN */
+#s-shein{background:#fff;z-index:20}
+.sh-nav{height:50px;background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;position:relative}
+.sh-back{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:none;background:none;font-size:18px;cursor:pointer;color:#222}
+.sh-logo{font-size:22px;font-weight:900;color:#E8563A;letter-spacing:-1px;flex:1;text-align:center}
+.sh-cart{font-size:18px;color:#222;position:relative}
+.sh-cart::after{content:'3';position:absolute;top:-5px;right:-7px;background:#E8563A;color:white;font-size:9px;font-weight:700;padding:1px 4px;border-radius:10px}
+.sh-search{margin:0 14px 8px;background:#f5f5f5;border-radius:20px;height:36px;display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0}
+.sh-search span{font-size:13px;color:#999}
+.sh-tabs{display:flex;gap:0;padding:0 14px;border-bottom:1px solid #eee;flex-shrink:0;overflow-x:auto}
+.sh-tabs::-webkit-scrollbar{display:none}
+.sh-tab{padding:8px 14px;font-size:13px;color:#888;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0}
+.sh-tab.on{color:#E8563A;border-bottom-color:#E8563A;font-weight:600}
+.sh-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#eee;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.sh-grid::-webkit-scrollbar{display:none}
+.sh-item{background:#fff;position:relative;cursor:default}
+.sh-img{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.sh-badge{position:absolute;top:8px;left:8px;background:#E8563A;color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px}
+.sh-badge-new{background:#111}
+.sh-info{padding:7px 8px 10px}
+.sh-price{font-size:14px;font-weight:700;color:#E8563A}
+.sh-orig{font-size:11px;color:#999;text-decoration:line-through;margin-left:4px}
+.sh-disc{font-size:11px;color:#E8563A;font-weight:600;margin-left:3px}
+.sh-name{font-size:11px;color:#555;margin-top:2px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sh-heart{position:absolute;top:8px;right:8px;font-size:18px;opacity:.7}
+/* Overlay d'interception Miroir sur l'écran Shein */
+#miroir-intercept{
+  position:fixed;inset:0;z-index:30;
+  background:rgba(4,3,10,.0);
+  backdrop-filter:blur(0px);
+  display:none;
+  flex-direction:column;
+  transition:background .4s ease, backdrop-filter .4s ease;
+}
+#miroir-intercept.show{
+  display:flex;background:rgba(4,3,10,.82);backdrop-filter:blur(14px);
+}
+.mi-pill{
+  margin:auto 20px 0;
+  background:var(--c2);border:1px solid var(--line);border-top:2px solid var(--fox);
+  border-radius:20px 20px 0 0;
+  padding:18px 20px calc(24px + var(--safe));
+  display:flex;flex-direction:column;gap:12px;
+  transform:translateY(100%);
+  transition:transform .45s cubic-bezier(.34,1.28,.64,1);
+}
+#miroir-intercept.show .mi-pill{transform:translateY(0)}
+.mi-header{display:flex;align-items:center;gap:10px}
+.mi-logo{font-size:28px}
+.mi-ttl{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--ink);line-height:1.3}
+.mi-sub{font-size:12px;color:var(--muted)}
+.mi-cta{width:100%;padding:14px;border:none;border-radius:12px;background:var(--red);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:transform .12s}
+.mi-cta:active{transform:scale(.97)}
+.mi-skip{width:100%;padding:11px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+
 /* SLIP */
 .slb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:14px;text-align:center}
 .slt{font-family:'Cormorant Garamond',serif;font-size:27px;font-weight:700}
@@ -463,6 +518,105 @@ textarea::placeholder{color:var(--muted)}
 </div>
 
 <!-- SLIP -->
+<!-- SHEIN FAKE -->
+<div class="scr" id="s-shein">
+  <div class="sh-nav">
+    <button class="sh-back" onclick="M.go('s6')">←</button>
+    <div class="sh-logo">SHEIN</div>
+    <div class="sh-cart">🛒</div>
+  </div>
+  <div class="sh-search"><span>🔍</span><span>robe été tendance</span></div>
+  <div class="sh-tabs">
+    <div class="sh-tab on">Pour toi</div>
+    <div class="sh-tab">Nouveautés</div>
+    <div class="sh-tab">Tops</div>
+    <div class="sh-tab">Robes</div>
+    <div class="sh-tab">Pantalons</div>
+  </div>
+  <div class="sh-grid" id="sh-grid">
+    <div class="sh-item">
+      <div class="sh-img" style="background:#F5D0C5">
+        <span style="font-size:52px">👗</span>
+        <div class="sh-badge">-71%</div>
+        <div class="sh-heart">🤍</div>
+      </div>
+      <div class="sh-info">
+        <div><span class="sh-price">6,99€</span><span class="sh-orig">24€</span><span class="sh-disc">-71%</span></div>
+        <div class="sh-name">Robe fleurie manches bouffantes</div>
+      </div>
+    </div>
+<div class="sh-item">
+      <div class="sh-img" style="background:#C8D8E8">
+        <span style="font-size:52px">👕</span>
+        <div class="sh-badge sh-badge-new">NOUVEAU</div>
+        <div class="sh-heart">🤍</div>
+      </div>
+      <div class="sh-info">
+        <div><span class="sh-price">12,99€</span><span class="sh-orig">39€</span><span class="sh-disc">-67%</span></div>
+        <div class="sh-name">Crop top côtelé sans manches</div>
+      </div>
+    </div>
+<div class="sh-item">
+      <div class="sh-img" style="background:#5B7FA6">
+        <span style="font-size:52px">👖</span>
+        <div class="sh-badge">-66%</div>
+        <div class="sh-heart">🤍</div>
+      </div>
+      <div class="sh-info">
+        <div><span class="sh-price">9,49€</span><span class="sh-orig">28€</span><span class="sh-disc">-66%</span></div>
+        <div class="sh-name">Jeans taille haute skinny</div>
+      </div>
+    </div>
+<div class="sh-item">
+      <div class="sh-img" style="background:#D4C8E8">
+        <span style="font-size:52px">🧥</span>
+        <div class="sh-badge">FLASH</div>
+        <div class="sh-heart">🤍</div>
+      </div>
+      <div class="sh-info">
+        <div><span class="sh-price">4,99€</span><span class="sh-orig">18€</span><span class="sh-disc">-72%</span></div>
+        <div class="sh-name">Crop hoodie oversize pastel</div>
+      </div>
+    </div>
+<div class="sh-item">
+      <div class="sh-img" style="background:#F0E0B0">
+        <span style="font-size:52px">🧣</span>
+        <div class="sh-badge">-64%</div>
+        <div class="sh-heart">🤍</div>
+      </div>
+      <div class="sh-info">
+        <div><span class="sh-price">7,99€</span><span class="sh-orig">22€</span><span class="sh-disc">-64%</span></div>
+        <div class="sh-name">Mini jupe plissée tendance</div>
+      </div>
+    </div>
+<div class="sh-item">
+      <div class="sh-img" style="background:#C8E8C8">
+        <span style="font-size:52px">👚</span>
+        <div class="sh-badge">TOP VENTE</div>
+        <div class="sh-heart">🤍</div>
+      </div>
+      <div class="sh-info">
+        <div><span class="sh-price">3,49€</span><span class="sh-orig">14€</span><span class="sh-disc">-75%</span></div>
+        <div class="sh-name">Débardeur basique stretch</div>
+      </div>
+    </div>
+  </div>
+  <!-- Interception Miroir -->
+  <div id="miroir-intercept">
+    <div class="mi-pill">
+      <div class="mi-header">
+        <div class="mi-logo">🪞</div>
+        <div>
+          <div class="mi-ttl">Léa, tu as quelque chose<br>à te dire.</div>
+          <div class="mi-sub" id="mi-sub">Tu t'étais engagée il y a 8 jours.</div>
+        </div>
+      </div>
+      <button class="mi-cta" onclick="M.goToOverlay()">Voir mon engagement →</button>
+      <button class="mi-skip" onclick="M.go('s6')">Fermer sans regarder</button>
+    </div>
+  </div>
+</div>
+
 <div class="scr" id="s8">
   <div class="sb"><span>22:49</span><span style="letter-spacing:2px">···</span></div>
   <div class="slb">
@@ -751,12 +905,59 @@ function refreshVic(n){
 }
 
 // ─── ACTIONS ──────────────────────────────────────────
+var sheinScrollInt=null, sheinInterceptTmr=null;
+
 function simT(){
   var k=ST.domains[ST.curD]||ST.domains[0]||'delivery',d=DC[k];
+  // Préparer l'overlay
   tx('oai',d.ai);tx('oan',d.a);tx('oqt',d.q);tx('oqm','— Toi, il y a '+ST.day+' jours');
   renderVidPlayback(k);
-  toast(d.l+' intercepté',d.e);
-  setTimeout(function(){go('s7');},1000);
+  // Aller sur l'écran Shein
+  go('s-shein');
+  startSheinSim(k, d);
+}
+
+function startSheinSim(domKey, domData){
+  // Reset scroll
+  var grid=$('sh-grid');
+  if(grid) grid.scrollTop=0;
+  // Cacher l'interception
+  var mi=$('miroir-intercept');
+  if(mi){ mi.classList.remove('show'); mi.style.display='none'; }
+  clearInterval(sheinScrollInt);
+  clearTimeout(sheinInterceptTmr);
+
+  // Auto-scroll lent pendant 2.5s
+  var scrolled=0;
+  sheinScrollInt=setInterval(function(){
+    if(!grid) return;
+    grid.scrollTop+=1.2;
+    scrolled+=1.2;
+    if(scrolled>220){
+      clearInterval(sheinScrollInt);
+    }
+  },16);
+
+  // Interception après 2.5s
+  sheinInterceptTmr=setTimeout(function(){
+    clearInterval(sheinScrollInt);
+    var mi=$('miroir-intercept');
+    if(mi){
+      mi.style.display='flex';
+      // Forcer reflow pour déclencher la transition
+      mi.offsetHeight;
+      mi.classList.add('show');
+    }
+    // Mettre à jour le sous-titre
+    tx("mi-sub","Tu t'étais engagée il y a "+ST.day+" jours.");
+  }, 2500);
+}
+
+function goToOverlay(){
+  // Cacher interception, aller sur s7
+  var mi=$('miroir-intercept');
+  if(mi) mi.classList.remove('show');
+  setTimeout(function(){ go('s7'); }, 350);
 }
 
 var btnTimerInt=null, btnReady=false;
@@ -1031,7 +1232,7 @@ function init(){
 
 // Retourner l'API publique
 return {
-  go:go, back:back, nav:nav, demo:demo, tryNext:tryNext,
+  go:go, back:back, nav:nav, demo:demo, tryNext:tryNext, goToOverlay:goToOverlay,
   saveDomains:saveDomains, switchD:switchD, pick:pick,
   simT:simT, resist:resist, saveSlip:saveSlip, pet:pet,
   toggleRec:toggleRec, validateRec:validateRec, cancelRec:cancelRec,
